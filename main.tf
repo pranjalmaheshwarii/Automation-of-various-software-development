@@ -1,14 +1,14 @@
 provider "google" {
-  credentials = file("${path.module}/black-outlet-438804-p8.json")
-  project     = "black-outlet-438804-p8"
+  credentials = file(var.credentials_path)
+  project     = var.project_id
   region      = "us-central1"
-  zone        = "us-central1-a"
+  zone        = var.vm_zone
 }
 
 resource "google_compute_instance" "software_automation_vm" {
-  name         = "software-automation-vm"
+  name         = var.vm_name
   machine_type = "e2-medium"
-  zone         = "us-central1-a"
+  zone         = var.vm_zone
 
   boot_disk {
     initialize_params {
@@ -24,7 +24,7 @@ resource "google_compute_instance" "software_automation_vm" {
   }
 
   metadata = {
-    ssh-keys = "maheshwaripreesha61:${file("~/.ssh/id_rsa.pub")}"
+    ssh-keys = "${var.ssh_user}:${file(var.ssh_public_key_path)}"
   }
 
   tags = ["jenkins", "cicd"]
