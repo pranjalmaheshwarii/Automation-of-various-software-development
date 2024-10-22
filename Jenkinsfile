@@ -1,7 +1,7 @@
 pipeline {
     agent any
     environment {
-        GOOGLE_CREDENTIALS = credentials('gcp-terraform-service-account') // Set the ID of the GCP credentials
+        GOOGLE_CREDENTIALS = credentials('gcloud-service-account') // Set the ID of the GCP credentials
         SSH_KEY = credentials('gcp-ssh-key') // Set the SSH Key credential ID
         PROJECT_ID = "black-outlet-438804-p8"
     }
