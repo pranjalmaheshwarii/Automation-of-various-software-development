@@ -7,13 +7,17 @@ pipeline {
         BUCKET_PATH = 'gs://bucket_2607/tf-k8-key' // GCS bucket path to store the credentials
         VM_NAME = 'software-automation-vm' // Name of the VM to create
         VM_ZONE = 'us-central1-a' // GCP zone where the VM will be created
+        VM_IP = '' // Placeholder for the VM IP address
     }
+    
     stages {
         stage('Generate SSH Key') {
             steps {
                 script {
-                    // Generate SSH key pair dynamically
-                    sh 'ssh-keygen -t rsa -b 4096 -f ${SSH_KEY_FILE} -q -N ""'
+                    // Generate SSH key pair dynamically only if not existing
+                    if (!fileExists("${SSH_KEY_FILE}")) {
+                        sh 'ssh-keygen -t rsa -b 4096 -f ${SSH_KEY_FILE} -q -N ""'
+                    }
                 }
             }
         }
@@ -21,40 +25,54 @@ pipeline {
         stage('Download GCP Service Account Key') {
             steps {
                 // Download the JSON key from the GCS bucket
-                sh '''
-                gsutil cp ${BUCKET_PATH}/${GCP_CREDENTIALS} .
-                '''
+                sh 'gsutil cp ${BUCKET_PATH}/${GCP_CREDENTIALS} .'
             }
         }
 
-        stage('Terraform Init & Apply - Create VM') {
+        stage('Terraform Init & Plan') {
             steps {
                 // Initialize Terraform
                 sh 'terraform init'
+                
+                // Run a Terraform plan to check for changes
+                sh 'terraform plan -var="project_id=${PROJECT_ID}" \
+                                   -var="credentials_path=./${GCP_CREDENTIALS}" \
+                                   -var="vm_name=${VM_NAME}" \
+                                   -var="vm_zone=${VM_ZONE}"'
+            }
+        }
 
+        stage('Terraform Apply - Create VM') {
+            steps {
                 // Apply Terraform to create the GCP VM
-                sh '''
-                terraform apply -var="project_id=${PROJECT_ID}" \
-                                -var="credentials_path=./${GCP_CREDENTIALS}" \
-                                -var="vm_name=${VM_NAME}" \
-                                -var="vm_zone=${VM_ZONE}" \
-                                -auto-approve
-                '''
+                sh 'terraform apply -var="project_id=${PROJECT_ID}" \
+                                   -var="credentials_path=./${GCP_CREDENTIALS}" \
+                                   -var="vm_name=${VM_NAME}" \
+                                   -var="vm_zone=${VM_ZONE}" \
+                                   -auto-approve'
+            }
+        }
+
+        stage('Capture VM IP') {
+            steps {
+                script {
+                    // Capture the VM IP address from Terraform output
+                    VM_IP = sh(script: "terraform output -raw instance_ip", returnStdout: true).trim()
+                    echo "VM IP: ${VM_IP}"
+                }
             }
         }
 
         stage('Add SSH Key to GCP VM Metadata') {
             steps {
                 script {
-                    def vm_ip = sh(script: "terraform output -raw instance_ip", returnStdout: true).trim()
-
-                    // Add public key to GCP VM metadata using gcloud CLI
-                    sh """
+                    // Add the SSH public key to the GCP VM metadata using gcloud CLI
+                    sh '''
                     gcloud compute instances add-metadata ${VM_NAME} \
                     --metadata ssh-keys="jenkins-user:${readFile('${SSH_KEY_FILE}.pub')}" \
                     --zone ${VM_ZONE} \
                     --project ${PROJECT_ID}
-                    """
+                    '''
                 }
             }
         }
@@ -62,12 +80,11 @@ pipeline {
         stage('Install Prerequisite Software on VM') {
             steps {
                 script {
-                    def vm_ip = sh(script: "terraform output -raw instance_ip", returnStdout: true).trim()
-
                     // Install Docker, Helm, Terraform, kubectl, Terragrunt, Ansible, etc.
                     sshagent (credentials: ['gcp-ssh-key']) {
                         sh """
-                        ssh -o StrictHostKeyChecking=no -i ${SSH_KEY_FILE} jenkins-user@${vm_ip} << EOF
+                        ssh -o StrictHostKeyChecking=no -i ${SSH_KEY_FILE} jenkins-user@${VM_IP} << EOF
+                        set -e
                         sudo apt update
                         sudo apt install -y docker.io
                         curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
@@ -91,12 +108,10 @@ pipeline {
         stage('Verify Installation') {
             steps {
                 script {
-                    def vm_ip = sh(script: "terraform output -raw instance_ip", returnStdout: true).trim()
-
                     // Verify the installations of the tools
                     sshagent (credentials: ['gcp-ssh-key']) {
                         sh """
-                        ssh -o StrictHostKeyChecking=no -i ${SSH_KEY_FILE} jenkins-user@${vm_ip} << EOF
+                        ssh -o StrictHostKeyChecking=no -i ${SSH_KEY_FILE} jenkins-user@${VM_IP} << EOF
                         docker --version
                         helm version
                         terraform version
