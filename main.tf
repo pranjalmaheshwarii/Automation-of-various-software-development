@@ -1,11 +1,11 @@
 variable "project_id" {
   type    = string
-  default = "black-outlet-438804-p8"
+  default = "black-outlet-438804-p8"  // Update with your project ID if necessary
 }
 
 variable "credentials_path" {
   type    = string
-  default = "./black-outlet-438804-p8-7ce3a755dbe1.json"
+  default = "./black-outlet-438804-p8-7ce3a755dbe1.json"  // Update path if necessary
 }
 
 variable "vm_name" {
@@ -20,12 +20,12 @@ variable "vm_zone" {
 
 variable "ssh_user" {
   type    = string
-  default = "jenkins-user"
+  default = "maheshwaripreesha61"  // Updated user
 }
 
 variable "ssh_public_key_path" {
   type    = string
-  default = "/tmp/id_rsa.pub"
+  default = "/home/maheshwaripreesha61/.ssh/id_rsa.pub"  // Updated path
 }
 
 provider "google" {
