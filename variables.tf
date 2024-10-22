@@ -18,10 +18,10 @@ variable "vm_zone" {
   type        = string
 }
 
-variable "ssh_user" {
-  description = "The username for SSH access"
+variable "ssh_public_key_path" {
+  description = "Path to the SSH public key file"
   type        = string
-  default     = "maheshwaripreesha61"  // Change as necessary
+  default     = "/home/maheshwaripreesha61/.ssh/id_rsa.pub"  // Change this to your actual home path
 }
 
 variable "ssh_public_key_path" {
