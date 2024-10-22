@@ -24,7 +24,7 @@ resource "google_compute_instance" "software_automation_vm" {
   }
 
   metadata = {
-    ssh-keys = "your-ssh-user:${file("~/.ssh/id_rsa.pub")}"
+    ssh-keys = "maheshwaripreesha61:${file("~/.ssh/id_rsa.pub")}"
   }
 
   tags = ["jenkins", "cicd"]
