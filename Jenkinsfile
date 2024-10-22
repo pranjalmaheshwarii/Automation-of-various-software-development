@@ -1,12 +1,12 @@
 pipeline {
     agent any
     environment {
-        SSH_KEY_FILE = 'jenkins_ssh_key'
-        PROJECT_ID = 'black-outlet-438804-p8'
-        GCP_CREDENTIALS = 'black-outlet-438804-p8-7ce3a755dbe1.json'
-        BUCKET_PATH = 'gs://bucket_2607/tf-k8-key'
-        VM_NAME = 'software-automation-vm'
-        VM_ZONE = 'us-central1-a'
+        SSH_KEY_FILE = 'jenkins_ssh_key' // Name of the SSH key file (private key)
+        PROJECT_ID = 'black-outlet-438804-p8' // GCP project ID
+        GCP_CREDENTIALS = 'black-outlet-438804-p8-7ce3a755dbe1.json' // GCP service account key filename
+        BUCKET_PATH = 'gs://bucket_2607/tf-k8-key' // GCS bucket path to store the credentials
+        VM_NAME = 'software-automation-vm' // Name of the VM to create
+        VM_ZONE = 'us-central1-a' // GCP zone where the VM will be created
     }
     stages {
         stage('Generate SSH Key') {
