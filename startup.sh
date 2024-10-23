@@ -5,7 +5,7 @@ apt-get update -y
 apt-get upgrade -y
 
 # Install necessary dependencies
-apt-get install -y apt-transport-https ca-certificates curl gnupg lsb-release
+apt-get install -y apt-transport-https ca-certificates curl gnupg lsb-release unzip
 
 # Install Docker
 curl -fsSL https://download.docker.com/linux/debian/gpg | apt-key add -
