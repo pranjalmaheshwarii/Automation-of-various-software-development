@@ -1,33 +1,3 @@
-variable "project_id" {
-  type    = string
-  default = "black-outlet-438804-p8"  // Update with your project ID if necessary
-}
-
-variable "credentials_path" {
-  type    = string
-  default = "./black-outlet-438804-p8-7ce3a755dbe1.json"  // Update path if necessary
-}
-
-variable "vm_name" {
-  type    = string
-  default = "software-automation-vm"
-}
-
-variable "vm_zone" {
-  type    = string
-  default = "us-central1-a"
-}
-
-variable "ssh_user" {
-  type    = string
-  default = "maheshwaripreesha61"  // Updated user
-}
-
-variable "ssh_public_key_path" {
-  type    = string
-  default = "/home/maheshwaripreesha61/.ssh/id_rsa.pub"  // Updated path
-}
-
 provider "google" {
   credentials = file(var.credentials_path)
   project     = var.project_id
@@ -38,7 +8,7 @@ provider "google" {
 resource "google_compute_instance" "software_automation_vm" {
   name         = var.vm_name
   machine_type = "e2-medium"
-  
+
   boot_disk {
     initialize_params {
       image = "debian-cloud/debian-11"
