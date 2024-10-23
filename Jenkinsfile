@@ -4,7 +4,7 @@ pipeline {
         PROJECT_ID = 'black-outlet-438804-p8' // GCP project ID
         GCP_CREDENTIALS = 'black-outlet-438804-p8-7ce3a755dbe1.json' // GCP service account key filename
         BUCKET_PATH = 'gs://bucket_2607/tf-k8-key' // GCS bucket path to store the credentials
-        VM_NAME = 'software-automation-vm' // Name of the VM to create
+        VM_NAME = 'software-automation-vm2' // Name of the VM to create
         VM_ZONE = 'us-central1-a' // GCP zone where the VM will be created
         VM_IP = '' // Placeholder for the VM IP address
     }
@@ -50,12 +50,44 @@ pipeline {
                 }
             }
         }
+
+        stage('Verify Software Installations') {
+            steps {
+                // SSH into the VM and check installed software versions
+                sh """
+                    gcloud compute ssh ${VM_NAME} --zone ${VM_ZONE} --command "
+                    echo 'Verifying installations...';
+                    if command -v docker &> /dev/null; then
+                        echo 'Docker version: \$(docker --version)';
+                    else
+                        echo 'Docker installation failed.';
+                    fi;
+                    if command -v helm &> /dev/null; then
+                        echo 'Helm version: \$(helm version --short)';
+                    else
+                        echo 'Helm installation failed.';
+                    fi;
+                    if command -v terraform &> /dev/null; then
+                        echo 'Terraform version: \$(terraform version)';
+                    else
+                        echo 'Terraform installation failed.';
+                    fi;
+                    if command -v ansible &> /dev/null; then
+                        echo 'Ansible version: \$(ansible --version | head -n 1)';
+                    else
+                        echo 'Ansible installation failed.';
+                    fi;
+                    echo 'Verification completed.';
+                    "
+                """
+            }
+        }
     }
 
     post {
         always {
             // Optional: Clean up the Terraform resources (destroy the VM)
-            //sh 'terraform destroy -auto-approve'
+            // sh 'terraform destroy -auto-approve'
             echo "Pipeline completed successfully. The VM has been created and will remain available."
         }
     }
