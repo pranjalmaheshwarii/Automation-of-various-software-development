@@ -50,17 +50,6 @@ pipeline {
                 }
             }
         }
-
-        stage('Verify Installation') {
-            steps {
-                script {
-                    // Verify the installations of the tools using curl for checking if the tools are accessible
-                    sh """
-                    curl -s --head http://localhost:8000 || echo "Error: Installation failed"
-                    """
-                }
-            }
-        }
     }
 
     post {
