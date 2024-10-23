@@ -17,15 +17,3 @@ variable "vm_zone" {
   description = "The zone where the VM will be created"
   type        = string
 }
-
-variable "ssh_user" {
-  description = "The username for SSH access"
-  type        = string
-  default     = "maheshwaripreesha61"
-}
-
-variable "ssh_public_key_path" {
-  description = "Path to the SSH public key file"
-  type        = string
-  default     = "/home/maheshwaripreesha61/.ssh/id_rsa.pub"
-}
