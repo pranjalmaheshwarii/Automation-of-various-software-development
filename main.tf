@@ -21,7 +21,7 @@ resource "google_compute_instance" "software_automation_vm" {
   }
 
   metadata = {
-    ssh-keys = "${var.ssh_user}:${file(var.ssh_public_key_path)}"
+    startup-script = file("startup.sh")  # Reference to the startup script
   }
 
   tags = ["http-server"]
